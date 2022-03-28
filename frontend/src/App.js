@@ -18,7 +18,7 @@ function App() {
         >
           Learn React
         </a>
-        <Link to="/invoices">Invoices</Link> |{" "}
+        <Link to="/invoices">Invoices</Link>
         <Link to="/expenses">Expenses</Link>
       </header>
     </div>
