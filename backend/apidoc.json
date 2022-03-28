@@ -1,0 +1,31 @@
+{
+	"name": "Butterfly Matrimonial",
+	"version": "1.0.0",
+	"description": "REST API documentation of Butterfly Matrimonial cross-platform server application. \n\nNote: Please collect your API Credentials from system admin before you start. Also contact admin in case of any issue.",
+	"title": "Butterfly Matters",
+	"order": [
+		"User_Authentication",
+		"User_Profile",
+		"User_Match",
+		"User_Conversation",
+		"User_Activity",
+		"User_Subscription",
+		"User_UserProduct",
+		"User_Support",
+		"Public_Product",
+		"Public_UserProduct",
+		"Public_Support",
+		"Public_Banner",
+		"Admin_Authentication",
+		"Admin_ProfileParameter",
+		"Admin_ProductParameter",
+		"Admin_Product",
+		"Admin_Management",
+		"Admin_Banner",
+		"Admin_User",
+		"Admin_Subscription",
+		"Admin_UserProduct",
+		"Admin_Log",
+		"Admin_System"
+	]
+}
