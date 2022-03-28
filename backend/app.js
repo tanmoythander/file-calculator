@@ -3,7 +3,6 @@
 var debug = require('debug')('express:server');
 var http = require('http');
 var socket_io = require('socket.io');
-var redisAdapter = require('socket.io-redis');
 var express = require('express');
 var path = require('path');
 // var favicon = require('serve-favicon');
