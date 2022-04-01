@@ -8,9 +8,6 @@
 		"dev": "node app.js",
 		"dev-watch": "nodemon app.js",
 		"dev-watch-lint": "nodemon app.js --exec 'npm run eslint && node'",
-		"prod": "PORT=8080 PRODUCTION=true node app.js",
-		"prod-watch": "PORT=8080 PRODUCTION=true nodemon app.js",
-		"prod-watch-lint": "PORT=8080 PRODUCTION=true nodemon app.js --exec 'npm run eslint && node'",
 		"prettify": "prettier --write .",
 		"eslint": "eslint app.js ./models ./routes ./components ./secrets"
 	},
@@ -28,15 +25,12 @@
 		"morgan": "^1.9.1",
 		"multer": "^1.4.2",
 		"multer-sftp": "^1.1.1",
-		"nocache": "^2.1.0",
 		"node-schedule": "^2.0.0",
 		"path": "^0.12.7",
 		"q": "^1.5.0",
 		"queue": "^6.0.2",
-		"serve-favicon": "~2.4.2",
 		"socket.io": "^4.1.2",
-		"ssh2-sftp-client": "^6.0.1",
-		"util": "^0.11.1"
+		"ssh2-sftp-client": "^6.0.1"
 	},
 	"devDependencies": {
 		"is-plain-object": "^2.0.4",

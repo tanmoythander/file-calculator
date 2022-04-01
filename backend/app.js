@@ -5,51 +5,18 @@ var http = require('http');
 var socket_io = require('socket.io');
 var express = require('express');
 var path = require('path');
-// var favicon = require('serve-favicon');
 var cors = require('cors');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
-var helmet = require('helmet');
-var noCache = require('nocache');
-var fs = require('fs');
-// var util = require('util');
 // delay plugin
 var delay = require('delay');
-// request limiter plugin
-var RateLimit = require('express-rate-limit');
-// firebase admin
-var firebaseAdmin = require('firebase-admin');
 /////////////// PLUGINS END ///////////////
 
-// initialize firebase admin
-firebaseAdmin.initializeApp({
-	credential: firebaseAdmin.credential.applicationDefault()
-});
-
-//initialize mongoose schemas
-require('./models/superAdmins');
-require('./models/admins');
-require('./models/users');
-require('./models/profileParams');
-require('./models/logs');
-require('./models/otps');
-require('./models/matches');
-require('./models/conversations');
-require('./models/activities');
-require('./models/products');
-require('./models/userProducts');
-require('./models/productParams');
-require('./models/incrementals');
-require('./models/payments');
-require('./models/banners');
-require('./models/subscriptions');
+// initialize mongoose schemas
+require('./models/queries'); // TODO
 
 // include the route modules
-var payment = require('./routes/payment');
-var public = require('./routes/public');
-var token = require('./routes/token');
-var user = require('./routes/user');
-var admin = require('./routes/admin');
+var query = require('./routes/query');
 
 // Require mongoose
 var mongoose = require('mongoose');
@@ -59,10 +26,7 @@ var dbOptions = {
 	useNewUrlParser: true,
 	useCreateIndex: true,
 	useUnifiedTopology: true,
-	useFindAndModify: false,
-	ssl: true,
-	sslValidate: true,
-	sslCA: [fs.readFileSync(__dirname + '/secrets/cert.pem')]
+	useFindAndModify: false
 };
 
 // Connect to mongoDB
@@ -88,26 +52,10 @@ mongoose.connection.on('open', function () {
 dbConnect(dbOptions);
 
 // CORS Config
-var whitelist = [];
-if (process.env.PRODUCTION === undefined) {
-	// dev
-	whitelist = [
-		'http://localhost:5101', // DEV Support
-		undefined, // POSTMAN Support
-		'https://sandbox.sslcommerz.com', // Payment Gateway
-		'https://dev.apps.butterflymatrimonial.com', // User Panel
-		'https://tou-hid.github.io', // Socket Client
-	];
-} else {
-	// production
-	whitelist = [
-		undefined, // POSTMAN Support
-		'https://securepay.sslcommerz.com', // Payment Gateway
-		'https://butterflymatrimonial.com', // User Panel
-		'https://www.butterflymatrimonial.com', // User Panel replica
-		'https://apps.butterflymatrimonial.com', // Admin Panel
-	];
-}
+var whitelist = [
+	'http://localhost:3040', // DEV Support
+	undefined // POSTMAN Support
+];
 var corsOptions = {
 	origin: function (origin, callback) {
 		if (whitelist.indexOf(origin) !== -1) {
@@ -124,29 +72,6 @@ var corsOptions = {
 // every API request gets started from here
 var app = express();
 
-// enable helmet
-app.use(helmet());
-app.use(noCache());
-app.use(
-	helmet.contentSecurityPolicy({
-		directives: {
-			// eslint-disable-next-line quotes
-			defaultSrc: ["'self'"]
-		}
-	})
-);
-app.use(
-	helmet.expectCt({
-		enforce: true,
-		maxAge: 180
-	})
-);
-app.use(
-	helmet.referrerPolicy({
-		policy: 'same-origin'
-	})
-);
-
 // Enable HTTPS on Bluemix
 // app.enable('trust proxy');
 
@@ -160,17 +85,6 @@ app.use(function (req, res, next) {
 	}
 });
 */
-
-// Enable request limiter
-var limiter = new RateLimit({
-	windowMs: 5 * 60 * 1000, // 5 minutes
-	delayAfter: 150,
-	delayMs: 1000,
-	max: 300
-});
-
-//  apply limiter to all requests
-app.use(limiter);
 
 // view engine setup
 //app.set('views', path.join(__dirname, 'views'));
@@ -191,21 +105,12 @@ app.use(
 );
 app.use(
 	express.json({
-		limit: '25mb'
+		limit: '5mb'
 	})
 );
 
-app.use('/payment', payment);
-
-// auth middleware
-var auth = require('./components/auth');
-app.use(auth.verifyApp);
-
-// Register the main routes
-app.use('/public', public);
-app.use('/token', token);
-app.use('/user', user);
-app.use('/admin', admin);
+// Register the main routes TODO
+app.use('/query', query);
 
 // catch 404 and forward to error handler
 // eslint-disable-next-line no-unused-vars
@@ -247,7 +152,7 @@ app.use(function (err, req, res, next) {
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '6259');
+var port = normalizePort(process.env.PORT || '3030');
 app.set('port', port);
 
 /**
@@ -266,16 +171,7 @@ var io = socket_io(server, {
 	transports: ['websocket', 'polling']
 });
 
-// Connect to redis adapter
-io.adapter(redisAdapter({
-	host: 'localhost',
-	port: 6379
-}));
-
-// register socket auth middleware
-io.use(auth.verifyUserSocket);
-
-// register socket handlers
+// register socket handlers TODO
 io.on('connection', function(socket) {
 	// Print socket connection log
 	console.log(`SOCKET_LOG: User (_id: ${
@@ -285,14 +181,14 @@ io.on('connection', function(socket) {
 		new Date().toLocaleString()}`);
 
 	// Set connected user's socketId
-	require('./components/socket').setId(socket.decoded.user._id,
-		socket.id, socket.decoded.appKey.name, socket.decoded.appKey.token);
+	// require('./components/socket').setId(socket.decoded.user._id,
+	// 	socket.id, socket.decoded.appKey.name, socket.decoded.appKey.token);
 
 	// Conversation handler
-	require('./handlers/conversation')(io, socket);
+	// require('./handlers/conversation')(io, socket);
 
 	// Socket disconnection handler
-	require('./handlers/disconnection')(io, socket);
+	// require('./handlers/disconnection')(io, socket);
 
 	// Test code
 	/*
@@ -358,39 +254,9 @@ server.on('listening', onListening);
 console.log('HTTP server started on, localhost:' + port);
 
 // functions
-
-function delayString(seconds) {
-	var sec = seconds % 60;
-	seconds -= sec;
-	var min = seconds / 60;
-	var temp = min;
-	min %= 60;
-	var hour = (temp - min) / 60;
-
-	var str = '';
-	if (hour > 0) {
-		str += hour;
-		str += ' hour';
-		if (hour > 1) str += 's';
-		if (min > 0 || sec > 0) str += ', ';
-	}
-	if (min > 0) {
-		str += min;
-		str += ' minute';
-		if (min > 1) str += 's';
-		if (sec > 0) str += ', ';
-	}
-	if (sec > 0) {
-		str += sec;
-		str += ' second';
-		if (sec > 1) str += 's';
-	}
-	return str;
-}
-
 function dbConnect(options) {
 	console.log('Connecting database ...');
-	mongoose.connect(require('./secrets/db'), options).then(
+	mongoose.connect('mongodb://localhost:27017/file-calculator', options).then(
 		function () {
 			console.log('Database connection successful');
 		},
@@ -398,7 +264,7 @@ function dbConnect(options) {
 			console.log(err);
 			console.log('Database connection failed');
 			reconnectTries++;
-			console.log('Reconnecting after ' + delayString(trialDelay));
+			console.log('Reconnecting after ' + require('./components/dateTime').toTimeString(trialDelay));
 			console.log('Reconnect trial: ' + reconnectTries);
 			console.log('');
 			delay(trialDelay * 1000).then(function () {

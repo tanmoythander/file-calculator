@@ -171,11 +171,41 @@ function ddmmmyyyy(millis) {
 	return (date < 10 ? '0' : '') + date + month + year;
 }
 
+function toTimeString(seconds) {
+	var sec = seconds % 60;
+	seconds -= sec;
+	var min = seconds / 60;
+	var temp = min;
+	min %= 60;
+	var hour = (temp - min) / 60;
+
+	var str = '';
+	if (hour > 0) {
+		str += hour;
+		str += ' hour';
+		if (hour > 1) str += 's';
+		if (min > 0 || sec > 0) str += ', ';
+	}
+	if (min > 0) {
+		str += min;
+		str += ' minute';
+		if (min > 1) str += 's';
+		if (sec > 0) str += ', ';
+	}
+	if (sec > 0) {
+		str += sec;
+		str += ' second';
+		if (sec > 1) str += 's';
+	}
+	return str;
+}
+
 module.exports = {
 	now: now,
 	today: today,
 	thatDay: thatDay,
 	jsToMysql: jsToMysql,
 	jsToMysqlOneYear: jsToMysqlOneYear,
-	ddmmmyyyy: ddmmmyyyy
+	ddmmmyyyy: ddmmmyyyy,
+	toTimeString: toTimeString
 };
